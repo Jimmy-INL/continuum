@@ -7,7 +7,6 @@ import pandas as pd
 from creme.base.estimator import Estimator
 
 
-
 class Windowing:
     """Roll through a dataframe manually
     """
