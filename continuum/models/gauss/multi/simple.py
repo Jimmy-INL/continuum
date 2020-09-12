@@ -55,15 +55,19 @@ class RandomizedGP(ApproximateGP):
         batch_shape = torch.Size([self.num_latents])
         self.mean_module = means.ConstantMean(batch_shape=batch_shape)
         self.covar_module = kernels.ScaleKernel(
-            kernels.RBFKernel(batch_shape=batch_shape), batch_shape=batch_shape
+            kernels.RBFKernel(batch_shape=batch_shape),
+            batch_shape=batch_shape
         )
 
 
 class SimpleMultiTaskVariationalModel(RandomizedGP):
     """Simple Multi-Task Variational Inference Model"""
-
     def __init__(
-        self, num_tasks=4, num_latents=3, latent_dim=-1, num_classes: int = 16
+        self,
+        num_tasks=4,
+        num_latents=3,
+        latent_dim=-1,
+        num_classes: int = 16
     ):
         super().__init__()
         self.num_tasks = num_tasks
