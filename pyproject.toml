@@ -16,6 +16,8 @@ loguru = "^0.5.1"
 creme = "^0.6.1"
 numpy = "^1.19.0"
 ta = "^0.5.25"
+toolz = "^0.10.0"
+sklearn = "^0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
