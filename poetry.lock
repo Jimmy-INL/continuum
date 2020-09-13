@@ -226,10 +226,7 @@ description = "An implementation of Gaussian Processes in Pytorch"
 name = "gpytorch"
 optional = false
 python-versions = ">=3.6"
-version = "1.1.1"
-
-[package.dependencies]
-torch = ">=1.5"
+version = "1.2.0"
 
 [package.extras]
 dev = ["black", "twine", "pre-commit"]
@@ -1516,7 +1513,7 @@ future = [
     {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
 ]
 gpytorch = [
-    {file = "gpytorch-1.1.1.tar.gz", hash = "sha256:76bd455db2f17af5425f73acfaa6d61b8adb1f07ad4881c0fa22673f84fb571a"},
+    {file = "gpytorch-1.2.0.tar.gz", hash = "sha256:fcb216e0c1f128a41c91065766508e91e487d6ffadf212a51677d8014aefca84"},
 ]
 gym = [
     {file = "gym-0.17.2.tar.gz", hash = "sha256:bb495aa56995b01274a2213423bf5ba05b8f4fd51c6dc61e9d4abddd1189718e"},
