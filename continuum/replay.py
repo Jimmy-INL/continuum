@@ -18,26 +18,27 @@ env = gym.make('CartPole-v0').unwrapped
 is_ipython = 'inline' in matplotlib.get_backend()
 if is_ipython:
     from IPython import display
-    
+
 plt.ion()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-Transition = namedtuple('Transition' , 
-                        ('state', 'action', 'next_state', 'reward'))
+Transition = namedtuple(
+    'Transition', ('state', 'action', 'next_state', 'reward')
+)
+
 
 class ReplayMemory(object):
-
-    def __init__(self,capacity):
+    def __init__(self, capacity):
         self.capacity = capacity
         self.memory = []
-        self.position = 0 
+        self.position = 0
 
     def push(self, *args):
-        if len(self.memory)<self.capacity:
+        if len(self.memory) < self.capacity:
             self.memory.append(None)
         self.memory[self.position] = Transition(*args)
-        self.position = (self.position +1) % self.capacity
+        self.position = (self.position + 1) % self.capacity
 
     def sample(self, batch_size):
         return random.sample(self.memory, batch_size)
@@ -47,23 +48,21 @@ class ReplayMemory(object):
 
 
 class DQN(nn.Module):
-
-    def __init__(self, h ,w, outputs):
+    def __init__(self, h, w, outputs):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 16, kernel_size =5, stride =2)
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
         self.bn1 = nn.BatchNorm2d(16)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size = 5, stride = 2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=5, stride=2)
         self.bn2 = nn.BatchNorm2d(32)
-        self.conv3 = nn.Conv2d(32, 32, kernel_size = 5, stride = 2)
+        self.conv3 = nn.Conv2d(32, 32, kernel_size=5, stride=2)
         self.bn3 = nn.BatchNorm2d(32)
 
+        def conv2d_size_out(size, kernel_size=5, stride=2):
+            return (size - (kernel_size - 1) - 1) // stride + 1
 
-        def conv2d_size_out(size, kernel_size = 5,stride =2):
-            return (size - (kernel_size - 1)- 1) // stride + 1
-            
         convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
         convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h)))
-        linear_input_size = convw * convh* 32
+        linear_input_size = convw * convh * 32
         self.head = nn.Linear(linear_input_size, outputs)
 
     def forward(self, x):
@@ -72,15 +71,19 @@ class DQN(nn.Module):
         x = F.relu(self.bn3(self.conv3(x)))
         return self.head(x.view(x.size(0), -1))
 
-resize = T.Compose([T.ToPILImage(),
-                    T.Resize(40, interpolation=Image.CUBIC),
-                    T.ToTensor()])
+
+resize = T.Compose([
+    T.ToPILImage(),
+    T.Resize(40, interpolation=Image.CUBIC),
+    T.ToTensor()
+])
 
 
 def get_cart_location(screen_width):
     world_width = env.x_threshold * 2
     scale = screen_width / world_width
-    return int(env.state[0] * scale + screen_width / 2.0)  # MIDDLE OF CART
+    return int(env.state[0] * scale + screen_width / 2.0) # MIDDLE OF CART
+
 
 def get_screen():
     # Returned screen requested by gym is 400x600x3, but is sometimes larger
@@ -88,7 +91,7 @@ def get_screen():
     screen = env.render(mode='rgb_array').transpose((2, 0, 1))
     # Cart is in the lower half, so strip off the top and bottom of the screen
     _, screen_height, screen_width = screen.shape
-    screen = screen[:, int(screen_height*0.4):int(screen_height * 0.8)]
+    screen = screen[:, int(screen_height * 0.4):int(screen_height * 0.8)]
     view_width = int(screen_width * 0.6)
     cart_location = get_cart_location(screen_width)
     if cart_location < view_width // 2:
@@ -96,8 +99,9 @@ def get_screen():
     elif cart_location > (screen_width - view_width // 2):
         slice_range = slice(-view_width, None)
     else:
-        slice_range = slice(cart_location - view_width // 2,
-                            cart_location + view_width // 2)
+        slice_range = slice(
+            cart_location - view_width // 2, cart_location + view_width // 2
+        )
     # Strip off the edges, so that we have a square image centered on a cart
     screen = screen[:, :, slice_range]
     # Convert to float, rescale, convert to torch tensor
@@ -110,12 +114,12 @@ def get_screen():
 
 env.reset()
 plt.figure()
-plt.imshow(get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
-           interpolation='none')
+plt.imshow(
+    get_screen().cpu().squeeze(0).permute(1, 2, 0).numpy(),
+    interpolation='none'
+)
 plt.title('Example extracted screen')
 plt.show()
-
-
 
 BATCH_SIZE = 128
 GAMMA = 0.999
@@ -141,7 +145,6 @@ target_net.eval()
 optimizer = optim.RMSprop(policy_net.parameters())
 memory = ReplayMemory(10000)
 
-
 steps_done = 0
 
 
@@ -158,7 +161,9 @@ def select_action(state):
             # found, so we pick action with the larger expected reward.
             return policy_net(state).max(1)[1].view(1, 1)
     else:
-        return torch.tensor([[random.randrange(n_actions)]], device=device, dtype=torch.long)
+        return torch.tensor([[random.randrange(n_actions)]],
+                            device=device,
+                            dtype=torch.long)
 
 
 episode_durations = []
@@ -178,7 +183,7 @@ def plot_durations():
         means = torch.cat((torch.zeros(99), means))
         plt.plot(means.numpy())
 
-    plt.pause(0.001)  # pause a bit so that plots are updated
+    plt.pause(0.001) # pause a bit so that plots are updated
     if is_ipython:
         display.clear_output(wait=True)
         display.display(plt.gcf())
@@ -195,10 +200,14 @@ def optimize_model():
 
     # Compute a mask of non-final states and concatenate the batch elements
     # (a final state would've been the one after which simulation ended)
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                          batch.next_state)), device=device, dtype=torch.bool)
-    non_final_next_states = torch.cat([s for s in batch.next_state
-                                                if s is not None])
+    non_final_mask = torch.tensor(
+        tuple(map(lambda s: s is not None, batch.next_state)),
+        device=device,
+        dtype=torch.bool
+    )
+    non_final_next_states = torch.cat([
+        s for s in batch.next_state if s is not None
+    ])
     state_batch = torch.cat(batch.state)
     action_batch = torch.cat(batch.action)
     reward_batch = torch.cat(batch.reward)
@@ -214,12 +223,15 @@ def optimize_model():
     # This is merged based on the mask, such that we'll have either the expected
     # state value or 0 in case the state was final.
     next_state_values = torch.zeros(BATCH_SIZE, device=device)
-    next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
+    next_state_values[non_final_mask] = target_net(non_final_next_states
+                                                   ).max(1)[0].detach()
     # Compute the expected Q values
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
     # Compute Huber loss
-    loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
+    loss = F.smooth_l1_loss(
+        state_action_values, expected_state_action_values.unsqueeze(1)
+    )
 
     # Optimize the model
     optimizer.zero_grad()
@@ -227,6 +239,7 @@ def optimize_model():
     for param in policy_net.parameters():
         param.grad.data.clamp_(-1, 1)
     optimizer.step()
+
 
 class MultiHorizonReward(object):
     def __init__(self):
@@ -244,7 +257,7 @@ class MultiHorizonReward(object):
             float: [description]
         """
         return 0.0
-    
+
     def reset(self):
         """Reset network
         """
@@ -252,6 +265,7 @@ class MultiHorizonReward(object):
 
     def train(self, action, state, reward):
         pass
+
 
 # gaussian_reward_process = MultiHorizonReward()
 
@@ -299,10 +313,4 @@ env.close()
 plt.ioff()
 plt.show()
 
-
-
-
-
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
