@@ -1,2 +1,2 @@
 # Continuum
-A way to pick apart general tasks in a faster way.
+A way to pick apart general tasks in dynamic systems in a faster way using Gaussian Processes and other mechanics.
