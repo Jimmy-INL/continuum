@@ -14,12 +14,13 @@ from gpytorch.means import ConstantMean, LinearMean
 from gpytorch.mlls import AddedLossTerm, DeepApproximateMLL, VariationalELBO
 from gpytorch.models import GP, ApproximateGP
 from gpytorch.models.deep_gps import DeepGP, DeepGPLayer
-from gpytorch.variational import (CholeskyVariationalDistribution,
-                                  VariationalStrategy)
+from gpytorch.variational import (
+    CholeskyVariationalDistribution, VariationalStrategy
+)
 from scipy.io import loadmat
 from torch.nn import Linear
 from torch.utils.data import DataLoader, TensorDataset
-from continuum.hidden import DeepGPHiddenLayer
+# from continuum.hidden import DeepGPHiddenLayer
 
 
 class ElevatorLoader:
@@ -42,20 +43,21 @@ class ElevatorLoader:
         test_x = X[train_n:, :].contiguous()
         test_y = y[train_n:].contiguous()
         if torch.cuda.is_available():
-            train_x, train_y, test_x, test_y = train_x.cuda(), train_y.cuda(), test_x.cuda(), test_y.cuda()
+            train_x, train_y, test_x, test_y = train_x.cuda(), train_y.cuda(
+            ), test_x.cuda(), test_y.cuda()
         return train_x, train_y, test_x, test_y
-
 
     @logger.catch(reraise=True)
     def load_data(self, train_x, train_y, test_x, test_y, batch_size=1024):
 
         train_dataset = TensorDataset(train_x, train_y)
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        
-        
+        train_loader = DataLoader(
+            train_dataset, batch_size=batch_size, shuffle=True
+        )
+
         test_dataset = TensorDataset(test_x, test_y)
         test_loader = DataLoader(test_dataset, batch_size=batch_size)
-        return train_loader, test_loader, train_x.shape 
+        return train_loader, test_loader, train_x.shape
 
     def get_data(self):
         X, y = self.params()
@@ -72,7 +74,6 @@ class ElevatorLoader:
 #     X = 2 * (X / X.max(0)[0]) - 1
 #     y = data[:, -1]
 
-
 # train_n = int(floor(0.8 * len(X)))
 # train_x = X[:train_n, :].contiguous()
 # train_y = y[:train_n].contiguous()
@@ -83,7 +84,5 @@ class ElevatorLoader:
 # if torch.cuda.is_available():
 #     train_x, train_y, test_x, test_y = train_x.cuda(), train_y.cuda(), test_x.cuda(), test_y.cuda()
 
-
 # train_dataset = TensorDataset(train_x, train_y)
 # train_loader = DataLoader(train_dataset, batch_size=1024, shuffle=True)
-

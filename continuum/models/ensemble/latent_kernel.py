@@ -30,7 +30,6 @@ class DeepKernelMultiTaskGaussian(gpytorch.Module):
             latent_dim=latent_dim,
             num_classes=num_classes
         )
-        # self.num_dim = num_dim
 
     @property
     def features_num(self) -> int:
