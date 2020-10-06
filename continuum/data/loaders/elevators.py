@@ -15,7 +15,8 @@ from gpytorch.mlls import AddedLossTerm, DeepApproximateMLL, VariationalELBO
 from gpytorch.models import GP, ApproximateGP
 from gpytorch.models.deep_gps import DeepGP, DeepGPLayer
 from gpytorch.variational import (
-    CholeskyVariationalDistribution, VariationalStrategy
+    CholeskyVariationalDistribution,
+    VariationalStrategy,
 )
 from scipy.io import loadmat
 from torch.nn import Linear

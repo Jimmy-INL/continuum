@@ -2,6 +2,7 @@
 import gpytorch
 from loguru import logger
 import torch
+import torch.nn.functional as F
 from gpytorch import variational, means, likelihoods
 
 from continuum.models.features.light import DenseLightFeatureExtractor
@@ -37,7 +38,7 @@ class DeepKernelMultiTaskGaussian(gpytorch.Module):
         return self.feature_extractor.out_num()
 
     def forward(self, x):
-        features = self.feature_extractor(x)
+        features = F.elu(self.feature_extractor(x))
         return self.gp_layer(features)
 
 
