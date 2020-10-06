@@ -105,10 +105,12 @@ class TimeseriesDataset(Dataset):
         frame: pd.DataFrame,
         window: int = 10,
         window_two: int = 3,
+        is_fold: bool = False,
         x_label: List[str] = ["state"],
         y_label: List[str] = ["reward"]
     ):
         self.n = 0
+        self.is_fold = is_fold
         local_frame = frame.copy()
         np_conv = lambda x: x.to_numpy()
         swindows = sliding_window(window)
@@ -154,7 +156,12 @@ class TimeseriesDataset(Dataset):
 
     def __iter__(self):
         self.n = 0
-        for x, y in self.random_fold():
+
+        items = {
+            True: self.random_fold(),
+            False: self.zipped_copy()
+        }[self.is_fold]
+        for x, y in items:
             self.n += 1
             yield x, y
 

@@ -1,23 +1,27 @@
 from collections import OrderedDict
-from typing import Callable, Dict, List, Union
-
+from typing import Tuple, Union, List
 import creme
+from loguru import logger
 import numpy as np
 import pandas as pd
-from creme.base.estimator import Estimator
+from continuum.data.generator import make_sarsa_frame
 
 
 class Windowing:
-    """Roll through a dataframe manually
     """
-
+        Roll through a dataframe manually.
+    """
     def __init__(
         self,
         frame: pd.DataFrame,
         window_size: int = 10,
         adaptive_window: bool = False,
         adapted_window_size: int = 1,
+        x_label: List[str] = ["state"],
+        y_label: List[str] = ["reward"]
     ):
+        self.x_label: List[str] = x_label
+        self.y_label: List[str] = y_label
         self._current_step: int = 0
         self._window_size: int = window_size
         self._lower_range: int = 0
@@ -85,22 +89,52 @@ class Windowing:
         bool
             True if there is another observation.
         """
-        return self._current_step < len(self.frame) - self.window - 1
+        return self._current_step < self._upper_range - self.window - 1
 
     @property
     def next_observation(self) -> Union[np.ndarray, pd.DataFrame]:
-        obs = self.frame[self.lower_bounds:self.upper_bounds]
-        return obs
+        return self.frame[self.lower_bounds:self.upper_bounds]
 
-    def step(self):
-        if self.has_next_observation:
-            self._current_step += 1
-            return self.next_observation
-        raise IndexError("Why are you on the wrong index?")
+    def step(self) -> pd.DataFrame:
+        if not self.has_next_observation:
+            raise IndexError("Why are you on the wrong index?")
+        self._current_step += 1
+        return self.next_observation
+
+    def step_split(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        frame: pd.DataFrame = self.step()
+        x_axis = frame[self.x_label]
+        y_axis = frame[self.y_label]
+        logger.info((x_axis.head(), y_axis.head()))
+        return x_axis, y_axis
 
     def reset(self):
         self._current_step = 0
 
+    def __len__(self):
+        return self._upper_range
+
+    def __iter__(self):
+        self._current_step = 0
+        while self.has_next_observation:
+            x_axis, y_axis = self.step_split()
+            yield x_axis, y_axis
+
+    # def __next__(self):
+    #     if self.n <= self.count:
+    #         self.n += 1
+    #         zipped = zip(self.copy())
+    #         return next(zipped)
+    #     raise StopIteration
+
+    # def __getitem__(self, idx):
+    #     if self.zip_list is None:
+    #         self.zip_list = list(zip(self.copy()))
+    #     return self.zip_list[idx]
+
 
 if __name__ == "__main__":
-    print("Hello World")
+    frame = make_sarsa_frame(n_samples=200)
+    slider = Windowing(frame)
+    for X, y in slider:
+        logger.success((X, y))
