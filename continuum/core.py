@@ -47,7 +47,7 @@ def get_sorted_fact(x_shape) -> int:
     return sorted_la_facts[0]
 
 
-SHAPE_VALUE = 20
+SHAPE_VALUE = 10
 
 
 def decompose_factor(x_arr: torch.Tensor) -> torch.Tensor:
@@ -64,7 +64,7 @@ def decompose_factor(x_arr: torch.Tensor) -> torch.Tensor:
 ListNumber = List[Union[float, int]]
 
 
-class BaseTrainer(BaseModel, abc.ABC):
+class BaseTrainer:
     epochs: int = 10
     num_tasks: int = 7
     num_classes: int = 500
@@ -233,7 +233,6 @@ class BaseTrainer(BaseModel, abc.ABC):
         self.likelihood.load_state_dict(state['likelihood'])
         self.loss.load_state_dict(state['loss'])
         self.optimizer.load_state_dict(state['optim'])
-        # logger.debug(state)
 
 
 if __name__ == "__main__":
@@ -243,6 +242,3 @@ if __name__ == "__main__":
         frame, x_label=["state", "actions"]
     )
     logger.info(learner.metrics)
-    # print(single_prediction[0])
-    # state = learner.state_dict()
-    # learner.load_state_dict(state)
