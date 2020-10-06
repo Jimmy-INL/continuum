@@ -1,0 +1,280 @@
+{
+    "title": "Traits Yaml Linter",
+    "description": "A traits linter and autocompletion.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "description": "The name of the item in question.",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description": "The description of the field you're trying to enter.",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "datatype": {
+            "title": "Datatype",
+            "description": "The type of data of a given item (property, state, or action)",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/TypeSchema"
+                }
+            ]
+        },
+        "type": {
+            "title": "Type",
+            "default": "trait",
+            "type": "string"
+        },
+        "states": {
+            "title": "States",
+            "default": [],
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/State"
+            }
+        },
+        "actions": {
+            "title": "Actions",
+            "default": [],
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Action"
+            }
+        },
+        "properties": {
+            "title": "Properties",
+            "default": [],
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Parameter"
+            }
+        },
+        "prop": {
+            "defaultSnippets": [
+                {
+                    "label": "New property",
+                    "description": "Creates a new property to describe a state.",
+                    "body": "\nname: ${1}\ndatatype:\n\ttype:${2}\n\trequired:${3|true, false|}\n\tdescription:${desc:A basic description}"
+                }
+            ]
+        }
+    },
+    "definitions": {
+        "TypeSet": {
+            "title": "TypeSet",
+            "type": "string",
+            "description": "A set of available types for the type function.",
+            "oneOf": [
+                {
+                    "const": "boolean",
+                    "description": "A boolean type"
+                },
+                {
+                    "const": "int",
+                    "description": "A integer type"
+                },
+                {
+                    "const": "string",
+                    "description": "A string type"
+                },
+                {
+                    "const": "float",
+                    "description": "A float type"
+                },
+                {
+                    "const": "set",
+                    "description": "A set type"
+                },
+                {
+                    "const": "union",
+                    "description": "A union type"
+                },
+                {
+                    "const": "range",
+                    "description": "A range type"
+                },
+                {
+                    "const": "nullable",
+                    "description": "nullable values"
+                },
+                {
+                    "const": "object",
+                    "description": "An object type"
+                },
+                {
+                    "const": "external",
+                    "description": "An external type"
+                }
+            ]
+        },
+        "TypeSchema": {
+            "title": "datatype",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "$ref": "#/definitions/TypeSet"
+                },
+                "innerType": {
+                    "$ref": "#/definitions/TypeSchema"
+                },
+                "value": {
+                    "title": "Value"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                }
+            }
+        },
+        "State": {
+            "title": "state",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The name of the item in question.",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "The description of the field you're trying to enter.",
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "datatype": {
+                    "description": "The type of data of a given item (property, state, or action)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/TypeSchema"
+                        }
+                    ]
+                }
+            }
+        },
+        "Parameter": {
+            "title": "Parameter",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "description": "The name of the item in question.",
+                    "type": "string"
+                },
+                "description": {
+                    "title": "Description",
+                    "description": "The description of the field you're trying to enter.",
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "datatype": {
+                    "title": "Datatype",
+                    "description": "The type of data of a given item (property, state, or action)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/TypeSchema"
+                        }
+                    ]
+                },
+                "required": {
+                    "title": "Required",
+                    "default": false,
+                    "type": "boolean"
+                }
+            }
+        },
+        "Validation": {
+            "title": "Validation",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "description": "The name of the item in question.",
+                    "type": "string"
+                },
+                "description": {
+                    "title": "Description",
+                    "description": "The description of the field you're trying to enter.",
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "datatype": {
+                    "title": "Datatype",
+                    "description": "The type of data of a given item (property, state, or action)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/TypeSchema"
+                        }
+                    ]
+                },
+                "expression": {
+                    "title": "Expression",
+                    "default": [],
+                    "type": "array",
+                    "items": {}
+                }
+            }
+        },
+        "Action": {
+            "title": "action",
+            "description": "An Action To Act On The Trait",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "The name of the item in question.",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "The description of the field you're trying to enter.",
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "parameters": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Parameter"
+                    }
+                },
+                "validations": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Validation"
+                    }
+                }
+            }
+        }
+    },
+    "$schema": "http://json-schema.org/draft-07/schema#"
+}

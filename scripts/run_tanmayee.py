@@ -12,14 +12,16 @@ import ta
 from loguru import logger
 
 from darwin_ml import __version__
-from darwin_ml.technical import (fibonacci, fibonacci_rsi,
-                                 super_hyper_mega_average_true_range)
+from darwin_ml.technical import (
+    fibonacci, fibonacci_rsi, super_hyper_mega_average_true_range
+)
 from darwin_ml.technical.momentum import rsi_positions
 from darwin_ml.technical.signals import fib_intensity_signal
 from darwin_ml.technical.volume import fibonacci_boll_bands
 from darwin_ml.utils import Windowing
-from darwin_ml.utils.preprocessing import (format_look_ahead,
-                                           format_timeseries_dataframe)
+from darwin_ml.utils.preprocessing import (
+    format_look_ahead, format_timeseries_dataframe
+)
 from typing import List
 from copy import copy, deepcopy
 from creme import stats
@@ -50,7 +52,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
         self.mean_module = gpytorch.means.ConstantMean()
         self.covar_module = gpytorch.kernels.ScaleKernel(
-            gpytorch.kernels.RBFKernel())
+            gpytorch.kernels.RBFKernel()
+        )
 
     def forward(self, x):
         mean_x = self.mean_module(x)
@@ -59,8 +62,8 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
 
 def stock_data():
-    BASE_DIR = Path(
-        __file__).resolve().parent.parent.cwd() / 'data' / 'stock_data.csv'
+    BASE_DIR = Path(__file__
+                    ).resolve().parent.parent.cwd() / 'data' / 'stock_data.csv'
     BASE_DIR_STR = str(BASE_DIR)
     return pd.read_csv(BASE_DIR_STR)
 
@@ -73,28 +76,35 @@ def main():
     df.dropna()
     df['log_returns'] = 0
     df['log_returns'] = np.where(df["Close_future"] > df["Close"], 1, 1)
-    df['log_returns'] = np.where(df["Close_future"] < df["Close"], -1,
-                                 df['log_returns'])
+    df['log_returns'] = np.where(
+        df["Close_future"] < df["Close"], -1, df['log_returns']
+    )
     df = fibonacci(df)
     df = fibonacci_rsi(df)
     # df = super_hyper_mega_average_true_range(df)
-    df = df.drop(columns=[
-        'Open', 'High', 'Low', 'Volume_Currency', 'Weighted_Price',
-        'Volume_BTC', 'Close', 'above_below_close', 'Close_future'
-    ])
+    df = df.drop(
+        columns=[
+            'Open', 'High', 'Low', 'Volume_Currency', 'Weighted_Price',
+            'Volume_BTC', 'Close', 'above_below_close', 'Close_future'
+        ]
+    )
     df = df.rename(columns={"log_returns": "y"})
     return df
 
 
-def roll_dataframe_stats(frame: pd.DataFrame,
-                         window=14,
-                         min_steps: int = 1,
-                         callback: Optional[Callable] = None,
-                         metric: metrics.ClassificationReport = metrics.ClassificationReport()):
-    windower = Windowing(frame,
-                         window_size=window,
-                         adaptive_window=False,
-                         adapted_window_size=0)
+def roll_dataframe_stats(
+    frame: pd.DataFrame,
+    window=14,
+    min_steps: int = 1,
+    callback: Optional[Callable] = None,
+    metric: metrics.ClassificationReport = metrics.ClassificationReport()
+):
+    windower = Windowing(
+        frame,
+        window_size=window,
+        adaptive_window=False,
+        adapted_window_size=0
+    )
 
     # while windower.has_next_observation:
     #     res = windower.step()
@@ -123,10 +133,15 @@ def roll_dataframe_stats(frame: pd.DataFrame,
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
     has_train = False
     model = ExactGPModel(torch.tensor([[]]), torch.tensor([]), likelihood)
-    optimizer = torch.optim.Adam([
-        # Includes GaussianLikelihood parameters
-        {'params': model.parameters()},
-    ], lr=0.1)
+    optimizer = torch.optim.Adam(
+        [
+                                             # Includes GaussianLikelihood parameters
+            {
+                'params': model.parameters()
+            },
+        ],
+        lr=0.1
+    )
     prior_training = None
     while windower.has_next_observation:
         if not windower.is_between_bounds:
@@ -152,10 +167,15 @@ def roll_dataframe_stats(frame: pd.DataFrame,
 
         model.train()
         likelihood.train()
-        optimizer = torch.optim.Adam([
-            # Includes GaussianLikelihood parameters
-            {'params': model.parameters()},
-        ], lr=0.1)
+        optimizer = torch.optim.Adam(
+            [
+                                                 # Includes GaussianLikelihood parameters
+                {
+                    'params': model.parameters()
+                },
+            ],
+            lr=0.1
+        )
 
         prior_information = train_x
         training_iter = 5
@@ -165,11 +185,13 @@ def roll_dataframe_stats(frame: pd.DataFrame,
             mll = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, model)
             loss = -mll(output, train_y)
             loss.backward()
-            print('Iter %d/%d - Loss: %.3f   lengthscale: %.3f   noise: %.3f' % (
-                i + 1, training_iter, loss.item(),
-                model.covar_module.base_kernel.lengthscale.item(),
-                model.likelihood.noise.item()
-            ))
+            print(
+                'Iter %d/%d - Loss: %.3f   lengthscale: %.3f   noise: %.3f' % (
+                    i + 1, training_iter, loss.item(),
+                    model.covar_module.base_kernel.lengthscale.item(),
+                    model.likelihood.noise.item()
+                )
+            )
             optimizer.step()
 
     return step_count >= min_steps, history
