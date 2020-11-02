@@ -201,6 +201,106 @@
                 }
             }
         },
+        "Ref": {
+            "title": "Ref",
+            "type": "object",
+            "properties": {
+                "ref": {
+                    "pattern": "(?:^|(?<= ))(property|state|parameter)(@)(\\w+)$",
+                    "description": "A reference refers to another property inside of the traits yaml. Must begin with (property | state | parameter), and the property must exist.",
+                    "examples": [
+                        "property@code",
+                        "state@code",
+                        "parameter@code"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "ref"
+            ]
+        },
+        "Equal": {
+            "title": "Equal",
+            "type": "object",
+            "properties": {
+                "eq": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/Ref"
+                            },
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "eq"
+            ]
+        },
+        "Negate": {
+            "title": "Negate",
+            "type": "object",
+            "properties": {
+                "neq": {
+                    "anyOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/definitions/Ref"
+                                    },
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "type": "integer"
+                                    },
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "$ref": "#/definitions/Ref"
+                        },
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "neq"
+            ]
+        },
         "Validation": {
             "title": "Validation",
             "type": "object",
@@ -233,11 +333,22 @@
                 },
                 "expression": {
                     "title": "Expression",
-                    "default": [],
-                    "type": "array",
-                    "items": {}
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Equal"
+                        },
+                        {
+                            "$ref": "#/definitions/Ref"
+                        },
+                        {
+                            "$ref": "#/definitions/Negate"
+                        }
+                    ]
                 }
-            }
+            },
+            "required": [
+                "expression"
+            ]
         },
         "Action": {
             "title": "action",

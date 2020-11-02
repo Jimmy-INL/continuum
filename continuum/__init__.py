@@ -1,6 +1,7 @@
 import abc
 from enum import Enum
 from pydantic import BaseModel
+from continuum.types.training import TrainingParameters as TrainParams
 
 
 class ExtraResp(Enum):

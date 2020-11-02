@@ -1,1 +1,2 @@
+from .ensemble.latent_kernel import DeepKernelMultiTaskGaussian
 from continuum.models.ensemble.deep_varint import DoublyContainer

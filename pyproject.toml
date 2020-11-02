@@ -22,6 +22,10 @@ pydantic = "^1.6.1"
 devtools = "^0.6"
 maya = "^0.6.1"
 einops = "^0.3.0"
+addict = "^2.3.0"
+jsonschema = "^3.2.0"
+python-digitalocean = "^1.15.0"
+tensorboard = "^2.3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
