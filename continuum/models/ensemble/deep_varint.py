@@ -162,8 +162,7 @@ class DoublyContainer:
     def get_state(self) -> dict:
         try:
             self.throw_model()
-            state_dict = self.model.state_dict()
-            return state_dict
+            return self.model.state_dict()
         except AttributeError:
             return {}
 

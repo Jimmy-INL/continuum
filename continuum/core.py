@@ -1,33 +1,26 @@
 # import abc
+import uuid
 from typing import Any, Dict, List, Optional, Union
 
 import gpytorch
 import pandas as pd
 import torch
-import uuid
 
-# import torch.nn.functional as F
-from einops import rearrange
 from gpytorch import likelihoods
 from gpytorch.distributions.multivariate_normal import MultivariateNormal
-from gpytorch.likelihoods import Likelihood
-from loguru import logger
-from toolz.functoolz import memoize
 from torch import optim
-from torch.nn import Module
-from torch.optim.optimizer import Optimizer
+from torch.optim.lr_scheduler import CyclicLR
 from torch.utils.data.dataset import Dataset
-from continuum.types import ModelClasses
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm, trange
 
 from continuum import Foundation, TrainParams
+from continuum.data import decompose_factor
 from continuum.data.generator import make_sarsa_frame
 from continuum.data.loaders import times
-from continuum.data import decompose_factor
-from continuum.trainers import TorchStandardScaler
 from continuum.models import DeepKernelMultiTaskGaussian
-from torch.utils.tensorboard import SummaryWriter
-from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts, CyclicLR, ExponentialLR
+from continuum.trainers import TorchStandardScaler
+from continuum.types import ModelClasses
 
 ListNumber = List[Union[float, int]]
 DEFAULT_TRAINING_PARAMS = TrainParams()
